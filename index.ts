@@ -9,8 +9,8 @@ class Transaction {
   
   constructor(
     public amount: number,
-    public payer: string, // payer public key
-    public payee: string  // payee public key
+    public payer:  string, // payer public key
+    public payee:  string  // payee public key
   ) {}
 
   toString() {
@@ -26,7 +26,17 @@ class Block {
   
   constructor(
     public prevHash: string,
+    public transaction: Transaction,
+    public ts = Date.now()
   ) {}
 
+  get hash() {
+    const str  = JSON.stringify(this);
+    const hash = crypto.createHash('SHA256'); // setup hashing function
 
+    // add string to hash
+    hash.update(str).end();
+    
+    return hash.digest('hex');
+  }
 }
