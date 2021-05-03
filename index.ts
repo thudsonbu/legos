@@ -51,8 +51,8 @@ class Chain {
 
   constructor() {
     this.chain = [ new Block( 
-      null, 
-      new Transaction( 100, 'genesis', 'thudson' ) // genisis block of blockchain
+      '', 
+      new Transaction( 100, 'genesis', 'thudsonbu' ) // genisis block of blockchain
     )];
   }
 
@@ -61,8 +61,15 @@ class Chain {
   }
   
   addBlock( transaction: Transaction, senderPublicKey: string, signature: Buffer ) {
-    const newBlock = new Block( this.lastBlock.hash, transaction );
-    this.chain.push(newBlock);
+    const verifier = crypto.createVerify( 'SHA256' );
+    verifier.update( transaction.toString() );
+
+    const isValid = verifier.verify( senderPublicKey, signature );
+
+    if ( isValid ) {
+      const newBlock = new Block( this.lastBlock.hash, transaction );
+      this.chain.push(newBlock);
+    }
   }
 }
 
