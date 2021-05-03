@@ -14,7 +14,7 @@ class Transaction {
   ) {}
 
   toString() {
-    return JSON.stringify(this);
+    return JSON.stringify( this );
   }
 }
 
@@ -33,13 +33,13 @@ class Block {
   ) {}
 
   get hash() {
-    const str  = JSON.stringify(this);
-    const hash = crypto.createHash('SHA256'); // setup hashing function
+    const str  = JSON.stringify( this );
+    const hash = crypto.createHash( 'SHA256' ); // setup hashing function
 
     // add string to hash
-    hash.update(str).end();
+    hash.update( str ).end();
     
-    return hash.digest('hex');
+    return hash.digest( 'hex' );
   }
 }
 
@@ -83,7 +83,7 @@ class Chain {
       const attempt = hash.digest( 'hex' );
 
       if ( attempt.substr( 0, 4 ) === '0000' ) {
-        console.log( `Solved: ${ solution} ` );
+        console.log( `Solved: ${ solution } ` );
         return solution;
       }
 
@@ -101,7 +101,7 @@ class Chain {
 
     if ( isValid ) { // if valid add to chain
       const newBlock = new Block( this.lastBlock.hash, transaction );
-      this.chain.push(newBlock);
+      this.chain.push( newBlock );
     }
   }
 }
