@@ -45,7 +45,7 @@ class Block {
  * The chain is a singleton linked list of blocks in the blockchain.
  */
 class Chain {
-  public static instance = new Chain();
+  public static instance = new Chain(); // force singleton
 
   chain: Block[];
 
@@ -66,3 +66,44 @@ class Chain {
   }
 }
 
+
+/**
+ * The wallet functions as the key manager for a user. When a transaction is
+ * created, a hash of the transaction data is first created using sha256. In
+ * order to make sure that the transaction was made by the payer, the hash is 
+ * signed with the payers private key. This makes sure that the transaction
+ * cannot be changed as the signed hash can be verified by comparing it with
+ * a hash of plain text transaction data after decrypting it with the public
+ * key.
+ */
+class Wallet {
+  public publicKey: string;
+  public privateKey: string;
+
+  constructor() {
+    // create new public and private key pair for wallet
+    const keypair = crypto.generateKeyPairSync( 'rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    });
+
+    this.privateKey = keypair.privateKey;
+    this.publicKey = keypair.publicKey;
+  }
+
+  sendMoney( amount: number, payeePublicKey: string ) {
+    // create a new transaction
+    const transaction = new Transaction( amount, this.publicKey, payeePublicKey );
+
+    // create a hash for the transaction
+    const sign = crypto.createSign( 'SHA256' );
+    sign.update( transaction.toString() ).end();
+
+    // sign the hash with the private key
+    const signature = sign.sign( this.privateKey );
+    
+    // add the new block to the chian
+    Chain.instance.addBlock( transaction, this.publicKey, signature );
+  }
+}
