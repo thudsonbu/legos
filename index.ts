@@ -23,6 +23,8 @@ class Transaction {
  * linked list or "chain".
  */
 class Block {
+  // a random number used in problem for proof of work
+  public nonce = Math.round( Math.random() * 999999999 );
   
   constructor(
     public prevHash: string,
@@ -59,14 +61,45 @@ class Chain {
   get lastBlock() {
     return this.chain[ this.chain.length - 1 ];
   }
+
+  /**
+   * Mining is the process of finding a random solution to a very difficult
+   * problem. This is used to avoid a double spending issue in a blockchain.
+   * If two blocks are created, the first to be verified by solving the mining
+   * problem and confirmed across all nodes will be added to the blockchain. If
+   * the two are confirmed simultaneously, the transaction with the most 
+   * confirmations will be added to the chain.
+   * @param nonce 
+   */
+  mine( nonce: number ) {
+    let solution = 1;
+    console.log( 'mining...' );
+
+    while( true ) {
+
+      const hash = crypto.createHash( 'MD5' );
+      hash.update( ( nonce + solution ).toString() ).end();
+
+      const attempt = hash.digest( 'hex' );
+
+      if ( attempt.substr( 0, 4 ) === '0000' ) {
+        console.log( `Solved: ${ solution} ` );
+        return solution;
+      }
+
+      solution += 1;
+    }
+  }
   
   addBlock( transaction: Transaction, senderPublicKey: string, signature: Buffer ) {
+    // create a verifier for the transaction
     const verifier = crypto.createVerify( 'SHA256' );
     verifier.update( transaction.toString() );
 
+    // verify created hash with signature
     const isValid = verifier.verify( senderPublicKey, signature );
 
-    if ( isValid ) {
+    if ( isValid ) { // if valid add to chain
       const newBlock = new Block( this.lastBlock.hash, transaction );
       this.chain.push(newBlock);
     }
